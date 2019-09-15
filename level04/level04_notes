@@ -1,0 +1,4 @@
+exposed webserver at localhost:4747
+apache 2.2.22
+
+make a custom http POST request defining 'x' as ';getflag'

@@ -1,0 +1,7 @@
+something to do with /opt/openarenaserver and the bizarre contents of /var/mail/flag05
+
+turns out one just needs to create an executable shell script that redirects
+`getflag' to a file in /tmp/ and wait for the cleanup script to execute it,
+provided it runs in less than 5 seconds
+
+viuaaale9huek52boumoomioc

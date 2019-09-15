@@ -1,0 +1,3 @@
+binary exploitation time, setresuid/setresgid are bad when setuid bits are set
+symlink in /tmp/
+
