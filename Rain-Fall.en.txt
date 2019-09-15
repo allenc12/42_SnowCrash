@@ -1,0 +1,198 @@
+Chapter 2: Introduction
+
+• As a developer, you risk in your career working on software which will be used
+by hundreds of people.
+
+• You have learned to design more or less complex programs, but you have rarely
+considered the security aspect.
+
+• By this project, you will quickly realize that you have probably introduced
+into your programs a number of easily exploitable flaws - the good news is that
+these flaws are also easily avoidable!
+
+• At the end of this project, you will not only avoid these pitfalls, but you
+will also gain a more accurate understanding of memory that will help you
+design bug-free programs.
+
+
+Chapter 3: Objectives
+
+• This project aims to make you discover, via several small challenges, the
+exploitation of binary type elf in an i386 system.
+
+• The methods you will use, more or less complex, will make you see differently
+computer science in general and especially be aware of the problems resulting
+poor programming practices.
+
+• During this project, you will surely encounter difficulties: let's be clear,
+these difficulties, you have to go beyond them yourself. Your approach to
+different events come really and only from YOU.
+
+• The interest here is from you develop a certain logic and acquire reflexes
+that will follow you by the following. Before asking for help, ask yourself if
+you really thought about it to all possibilities.
+
+
+Chapter 4: General Instructions
+
+• This project will only be corrected by humans.
+
+• During your defense, you may be required to prove your results. It is
+necessary you prepare for it.
+
+• You will have to use an x86_64 virtual machine to do this project. And once
+your machine is launched with the ISO provided with the subject, if everything
+is well configured, you will have a simple prompt with an IP:
+
+ _____       _       ______    _ _
+| __  \     (_)     |  ____|  | | |
+| |__) |__ _ _ _ __ | |__ __ _| | |
+|  _  /  _` | | '_ \|  __/ _` | | |
+| | \ \ (_| | | | | | | | (_| | | |
+|_|  \_\__,_|_|_| |_|_|  \__,_|_|_|
+
+            Good luck & Have fun
+
+  To start, ssh with level0/level0 on 172.16.39.128:4242
+level0@172.16.39.128's password:
+
+
+If the ip address is not visible you can recover it once
+connected by the ifconfig command.
+
+• At that moment, you will be able to connect using the couple
+password: password level0: level0.
+I strongly advise you to use the SSH connection available on port 4242:
+$> ssh level0@192.168.1.13 -p 4242
+
+• Once connected, you will have to find the way to read the file .pass with the
+user account "levelX" of the next level (X = number of the next level).
+
+
+Project SECURITY - Rain Fall
+
+• This .pass file is located at the root of the home of each user (level0 excluded).
+
+• Of course, once level9 you must logically go to the bonus0 user.
+
+• Here is an example of a session:
+
+level0 @ RainFall: ~ $ ./level0 $ (exploit)
+$ cat /home/user/level1/.pass
+?????????????????????
+$ exit
+level0 @ RainFall: ~ $ su level1
+Password:
+level1 @ RainFall: ~ $ _
+
+• Nothing is left to chance. In case of problems, ask yourself first of all if there is
+is not a concern on your side.
+
+• Any use of automation tool will be considered a cheat case and will be
+therefore sanctioned with a -42
+
+• Obviously, in case of a bug, warn the pedago!
+
+• You can ask your questions on the forum, on jabber, IRC, slack ...
+
+6
+
+
+Chapter 5: Mandatory part
+
+• Your submission folder should only contain the things that allowed you to
+solve each of the validated tests.
+
+• Your submission will be of the form:
+// See pdf
+
+• You will place everything you will need to prove your resolution in
+defense in the Resources folder. It is possible that the flag file is empty,
+but a justification will then be required.
+
+• The source file must contain the binary exploited in its understandable form
+for a developer. Language is not imposed.
+
+7
+
+
+Project SECURITY
+
+Rain Fall
+
+• The walkthrough file should contain the steps that allowed the resolution of
+the test.
+
+ ! ATTENTION: Everything in this folder must be able to be
+ ! explained clearly without any hesitation. NO binary should
+ ! be present in this file.
+
+• If you need to use a specific file present on the ISO of the project, you
+must download it in defense. You must not under any circumstances put
+this one in your repository.
+
+• In the case of using specific external software, you must prepare a
+specific environment (VM, docker, Vagrant).
+
+• Scripting to save time is encouraged, but a
+detailed explanation may be requested in defense.
+
+• As part of your mandatory game, you must complete the list of levels
+next :
+
+◦ level0.
+◦ level1.
+◦ level2.
+◦ level3.
+◦ level4.
+◦ level5.
+◦ level6.
+◦ level7.
+◦ level8.
+◦ level9.
+
+• During your defense each member of the group must be able to justify each
+challenge solved.
+
+ - For the clever (or not) ... Of course you do not have the right to
+ - bruteforce ssh flags. It would be useless anyway, since
+ - you must justify your resolution in defense.
+
+8
+
+
+Chapter VI
+Bonus Part
+
+ ! Bonuses will only be counted if your mandatory game
+ ! is PERFECT. By PERFECT, we obviously hear that she
+ ! is fully realized, and it is not possible to put
+ ! his behavior in default, even in case of error as vicious
+ ! be it, misuse, etc ... Concretely, this
+ ! means that if your mandatory part is not validated, your
+ ! bonuses will be fully IGNORED.
+
+As part of your bonus, you can complete the following level list:
+• bonus0
+• bonus1
+• bonus2
+• bonus3
+
+ - The last user is "end".
+
+ ! Becoming root is considered here as cheating.
+
+9
+
+
+Chapter VII
+
+Submission and peer-evaluation
+Make your work on your GiT repo as usual. Only the present work
+on your repository will be assessed in defense.
+
+ - Exceptionally, this project will be corrected by a member of the team
+ - pedagogy. When you have closed your project and want it
+ - corrected, contact Wandre (`wil' on the Slack) to organize
+ - your defense.
+
