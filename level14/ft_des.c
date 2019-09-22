@@ -4,6 +4,10 @@
 #include <unistd.h>
 #include <assert.h>
 
+#ifndef DEBUG
+# define DEBUG 0
+#endif
+
 const char *toks[] = {
     "I`fA>_88eEd:=`85h0D8HE>,D",
     "7`4Ci4=^d=J,?>i;6,7d416,7",
@@ -24,7 +28,7 @@ const char *toks[] = {
 
 const char *s = "0123456";
 
-char *ft_des(const char *str) {
+char *not_des(const char *str) {
   char *ret = strdup(str);
   int ii, jj, ll;
 
@@ -46,26 +50,42 @@ char *ft_des(const char *str) {
     }
     ++ii;
     ++ll;
+    if (DEBUG) fprintf(stderr, "%s\n", ret);
   }
   return ret;
+}
+
+void dbg_print(void) {
+	const char *str1_txt = "AAA";
+	const char *str1_enc = "prn";
+	char *t1, *t2;
+
+	t1 = not_des(str1_txt);
+	t2 = not_des(str1_enc);
+	free(t1);
+	free(t2);
 }
 
 int main(int argc, const char *argv[]) {
   char *ret, *chk;
   int ii;
 
+  if (argc == 1 && DEBUG) {
+	  dbg_print();
+	  return 0;
+  }
   if (argc >= 2) {
     ii = atoi(argv[1]);
     if (ii < 0 || ii > 15) {
       fputs("Error: must specify a number from 0 to 14 inclusive.", stderr);
       return 1;
     }
-    ret = ft_des(toks[ii]);
+    ret = not_des(toks[ii]);
     puts(ret);
     free(ret);
   } else {
     for (ii = 0; ii < 15; ++ii) {
-      ret = ft_des(toks[ii]);
+      ret = not_des(toks[ii]);
       printf("tok_3%03d = %s\n", ii, ret);
       free(ret);
     }
