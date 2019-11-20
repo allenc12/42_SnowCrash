@@ -314,56 +314,48 @@ def level14():
     sh.close()
 
 
-if __name__ == "__main__":
-    tmp = -1
-    if len(sys.argv) > 1 and sys.argv[1].isdigit():
-        tmp = int(sys.argv[1])
-        flags = ref_flags[:tmp]
-    if tmp < 0:
-        level00()
-        level01()
-        level02()
-        level03()
-        level04()
-        level05()
-        level06()
-        level07()
-        level08()
-        level09()
-        level10()
-        level11()
-        level12()
-        level13()
-        level14()
+def main(args):
+    # init
+    usage = "Usage: %s [0-14]" % args[0]
+    num = None
+    if len(args) == 2:
+        try:
+            num = int(args[1])
+            flags = ref_flags[:num]
+        except:
+            print "Error: invalid argument: %r" % args[1]
+            print usage
+            exit(1)
+    # exec
+    funs = [
+        level00,
+        level01,
+        level02,
+        level03,
+        level04,
+        level05,
+        level06,
+        level07,
+        level08,
+        level09,
+        level10,
+        level11,
+        level12,
+        level13,
+        level14,
+    ]
+    if num:
+        try:
+            funs[num]()
+        except Exception as e:
+            print "Error: argument out of range: %r" % num
+            print usage
+            exit(1)
     else:
-        if tmp == 0:
-            level00()
-        if tmp == 1:
-            level01()
-        if tmp == 2:
-            level02()
-        if tmp == 3:
-            level03()
-        if tmp == 4:
-            level04()
-        if tmp == 5:
-            level05()
-        if tmp == 6:
-            level06()
-        if tmp == 7:
-            level07()
-        if tmp == 8:
-            level08()
-        if tmp == 9:
-            level09()
-        if tmp == 10:
-            level10()
-        if tmp == 11:
-            level11()
-        if tmp == 12:
-            level12()
-        if tmp == 13:
-            level13()
-        if tmp == 14:
-            level14()
-    # done
+        for fun in funs:
+            fun()
+
+
+if __name__ == "__main__":
+    main(sys.argv)
+
