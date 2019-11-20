@@ -3,7 +3,7 @@ import re
 import sys
 from pwn import *
 
-context.log_level = "CRITICAL"
+context.log_level = "INFO"
 flags = []
 flag_reg = re.compile("\w{25,39}")
 ref_flags = [
@@ -145,20 +145,31 @@ def level04():
 # level05@SnowCrash
 # cronjobs and/or init.rc
 def level05():
-    with context.local(log_level="WARNING"):
-        from datetime import datetime
+    from datetime import datetime
+
+    def get_time_left(now):
+        sec = 0
         fmt = ""
-        now = datetime.now()
         if now.minute % 2 == 0:
             fmt += "1 minute"
+            sec += 60
         tmp = 60 - now.second
+        sec += tmp
         if tmp != 0:
             if now.minute % 2 == 0:
                 fmt += " and "
             fmt += "{} second".format(tmp)
             if tmp != 1:
                 fmt += "s"
-        log.warning("Should complete in {}".format(fmt))
+        return "Should complete in {}".format(fmt), sec
+
+    out, sec = get_time_left(datetime.now())
+    # print out, "\t [%d]" % sec
+    with log.progress("Level05 - waiting for cronjob") as p:
+        for i in range(sec-1, 0, -1):
+            p.status(" %d" % i)
+            replacements.sleep(1)
+
     sh = ssh("level05", rhost, password=flags[4], port=rport)
     res = sh[
         "rm -f /tmp/flag;"
@@ -339,14 +350,12 @@ def main(args):
     global flags
     usage = "Usage: %s [0-14]" % args[0]
     num = None
-    if len(args) == 2:
-        try:
-            num = int(args[1])
-            flags = ref_flags[:num]
-        except:
-            print "Error: invalid argument: %r" % args[1]
-            print usage
-            exit(1)
+    if len(args) == 2 and args[1].isdigit():
+        num = int(args[1])
+    else:
+        num = ui.options("Which level would you like to run?", ["level{:02d}".format(i) for i in range(15)], -1)
+    if num >= 0:
+        flags = ref_flags[:num]
     # exec
     funs = [
         level00,
@@ -365,13 +374,8 @@ def main(args):
         level13,
         level14,
     ]
-    if num is not None:
-        try:
-            funs[num]()
-        except Exception as e:
-            print "Error: argument out of range: {}".format(e)
-            print usage
-            exit(1)
+    if num != -1:
+        funs[num]()
     else:
         for fun in funs:
             fun()
