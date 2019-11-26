@@ -1,4 +1,5 @@
 #!/usr/bin/env python2
+#TODO: update to most recent version of pwntools which supports python3
 import re
 import sys
 from pwn import *
