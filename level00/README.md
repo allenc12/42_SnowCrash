@@ -10,8 +10,8 @@ level00:~ $
 Search for suspicious files using `find`
 ```bash
 level00:~ $ find / -type -f -user flag00 2>/dev/null
-/etc/john # TODO get actual file path
-level00:~ $ cat /etc/john
+/usr/sbin/john
+level00:~ $ cat /usr/sbin/john
 # TODO get contents of file
 level00:~ $
 ```
