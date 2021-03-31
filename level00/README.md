@@ -12,27 +12,22 @@ Search for suspicious files using `find`
 level00:~ $ find / -type -f -user flag00 2>/dev/null
 /usr/sbin/john
 level00:~ $ cat /usr/sbin/john
-# TODO get contents of file
+cdiiddwpgswtgt
 level00:~ $
 ```
 
 Simple monoalphabetic cipher
-```python
-import sys
-
-def rot_alpha(n):
-    from string import ascii_lowercase as lc, ascii_uppercase as uc, maketrans
-    lookup = maketrans(lc + uc, lc[n:] + lc[:n] + uc[n:] + uc[:n])
-    return lambda s: s.translate(lookup)
-
-
-print(rot_alpha(11)(sys.argv[1]))
+```bash
+level00:~ $ cat /usr/sbin/john | tr '[A-Za-z]' '[L-ZA-Kl-za-k]'
+nottoohardhere
+level00:~ $ 
 ```
 
 Claim flag00
 ```bash
 level00:~ $ su flag00
-# TODO get password
+Password: nottoohardhere
 flag00:~ $ getflag
-#TODO getflag output
+Check flag.Here is your token : x24ti5gi3x0ol2eh4esiuxias
+flag00:~ $ 
 ```
