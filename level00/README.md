@@ -7,7 +7,7 @@ password: level00
 level00:~ $
 ```
 
-Search for suspicious files using `find`
+Search for suspicious files using `find` on a whim with no hints whatsoever
 ```bash
 level00:~ $ find / -type -f -user flag00 2>/dev/null
 /usr/sbin/john
@@ -16,7 +16,7 @@ cdiiddwpgswtgt
 level00:~ $
 ```
 
-Simple monoalphabetic cipher
+Simple monoalphabetic cipher, [this website](https://rot13.com/) is very useful for basic rotN variations.
 ```bash
 level00:~ $ cat /usr/sbin/john | tr '[A-Za-z]' '[L-ZA-Kl-za-k]'
 nottoohardhere
