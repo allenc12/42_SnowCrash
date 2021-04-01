@@ -13,10 +13,10 @@ For scripting convenience purposes I used the command line interface `tshark`.
 The `-z` flag displays the contents of a TCP or UDP stream between two nodes.
 See the relevant documentation [here](https://www.wireshark.org/docs/man-pages/tshark.html#z-follow-prot-mode-filter-range)
 ```bash
-root@kali:~# scp level02@SnowCrash:/tmp/level02.pcap ./level02.pcap
-root@kali:~# tshark -z follow,tcp,raw,0,30-50 -r level02.pcap | gawk '$0~/^[[:xdigit:]]{2}$/{print$1}' | tr '\n' ' ' | xxd -r
+root@kali:~$ scp level02@SnowCrash:/tmp/level02.pcap ./level02.pcap
+root@kali:~$ tshark -z follow,tcp,raw,0,30-50 -r level02.pcap | gawk '$0~/^[[:xdigit:]]{2}$/{print$1}' | tr '\n' ' ' | xxd -r
 t_wandrNDRel
-root@kali:~#
+root@kali:~$
 ```
 
 Claim flag
