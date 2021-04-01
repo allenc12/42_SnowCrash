@@ -17,7 +17,8 @@ Wow, in an unrelated train of thought, why don't we take a look at `/var/spool/c
 */2 * * * * su -c "sh /usr/sbin/openarenaserver" - flag05
 0 * * * * rm -rf /tmp/* /var/tmp/*
 ```
-Every 2 minutes, `su -c "sh /usr/sbin/openarenaserver" - flag05` is run, executing `sh /usr/sbin/openarenaserver` as `flag05`
+Every 2 minutes, `su -c "sh /usr/sbin/openarenaserver" - flag05` is run, executing `sh /usr/sbin/openarenaserver` as `flag05`.
+
 Every minute `rm -rf /tmp/* /var/tmp/*` is run.
 
 So, what's inside of `/usr/sbin/openarenaserver`?
