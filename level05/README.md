@@ -30,9 +30,9 @@ for i in /opt/openarenaserver/* ; do
 	rm -f "$i"
 done
 ```
-So this script executes whatever is inside of `/opt/openarenaserver` as a bash script with a limit of 5 seconds of cpu time, before removing it.
+This script executes whatever is inside of `/opt/openarenaserver` as a bash script with a limit of 5 seconds of cpu time, before removing it.
 
-So, lets make our own bash script to get our flag
+Thenceforth, lets make our own bash script to get our flag
 ```bash
 level05@SnowCrash:~ $ rm -f /tmp/flag; \
 > printf '#!/bin/sh\ngetflag>/tmp/flag\n'>/opt/openarenaserver/snjort; \
