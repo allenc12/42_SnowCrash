@@ -58,10 +58,11 @@ level14@SnowCrash:~$
 
 This method is significantly more time consuming and difficult.
 
-Starting with the disassembly of `ft_des`, here I have renamed offsets relative to ebp into more helpful names. TODO finish
+Starting with the disassembly of `ft_des`, here I have renamed offsets relative to ebp into more helpful names. 
 ```bash
 level13@SnowCrash:~$ gdb -batch -ex 'file level13' -ex 'set disassembly-flavor intel' -ex 'disas ft_des'
 Dump of assembler code for function ft_des:
+alph= db '0123456', 0
 var_2C= DWORD PTR -0x2c
 ii= DWORD PTR -0x1c
 jj= DWORD PTR -0x18
@@ -76,87 +77,87 @@ s= DWORD PTR  8
    0x0804847b <+7>:     mov    eax,DWORD PTR [ebp+s]
    0x0804847e <+10>:    mov    DWORD PTR [esp],eax
    0x08048481 <+13>:    call   0x8048370 <strdup@plt>
-   0x08048486 <+18>:    mov    DWORD PTR [ebp+res],eax          ; res=strdup(s)
-   0x08048489 <+21>:    mov    DWORD PTR [ebp+jj],0x0           ; ii=0
-   0x08048490 <+28>:    mov    DWORD PTR [ebp+ii],0x0           ; jj=0
-   0x08048497 <+35>:    jmp    0x804855b <ft_des+231>           ; yump
-   0x0804849c <+40>:    cmp    DWORD PTR [ebp+jj],0x6
+   0x08048486 <+18>:    mov    DWORD PTR [ebp+res],eax                ; res=strdup(s)
+   0x08048489 <+21>:    mov    DWORD PTR [ebp+jj],0x0                 ; ii=0
+   0x08048490 <+28>:    mov    DWORD PTR [ebp+ii],0x0                 ; jj=0
+   0x08048497 <+35>:    jmp    0x804855b <ft_des+231>                 ; begin loop
+   0x0804849c <+40>:    cmp    DWORD PTR [ebp+jj],0x6                 ; if (jj == 6)
    0x080484a0 <+44>:    jne    0x80484a9 <ft_des+53>
-   0x080484a2 <+46>:    mov    DWORD PTR [ebp+jj],0x0
+   0x080484a2 <+46>:    mov    DWORD PTR [ebp+jj],0x0                 ;     jj=0
    0x080484a9 <+53>:    mov    eax,DWORD PTR [ebp+ii]
    0x080484ac <+56>:    and    eax,0x1
    0x080484af <+59>:    test   al,al
-   0x080484b1 <+61>:    je     0x80484ff <ft_des+139>
-   0x080484b3 <+63>:    mov    DWORD PTR [ebp+var_14],0x0
+   0x080484b1 <+61>:    je     0x80484ff <ft_des+139>                 ; if (ii & 1)
+   0x080484b3 <+63>:    mov    DWORD PTR [ebp+var_14],0x0             ;     var_14=0
    0x080484ba <+70>:    jmp    0x80484ea <ft_des+118>
    0x080484bc <+72>:    mov    eax,DWORD PTR [ebp+ii]
    0x080484bf <+75>:    mov    edx,DWORD PTR [ebp+res]
    0x080484c2 <+78>:    add    eax,edx
    0x080484c4 <+80>:    movzx  edx,BYTE PTR [eax]
    0x080484c7 <+83>:    add    edx,0x1
-   0x080484ca <+86>:    mov    BYTE PTR [eax],dl
+   0x080484ca <+86>:    mov    BYTE PTR [eax],dl                      ;     res[ii] = res[ii] + 1
    0x080484cc <+88>:    mov    eax,DWORD PTR [ebp+ii]
    0x080484cf <+91>:    mov    edx,DWORD PTR [ebp+res]
    0x080484d2 <+94>:    add    eax,edx
    0x080484d4 <+96>:    movzx  eax,BYTE PTR [eax]
-   0x080484d7 <+99>:    cmp    al,0x7f
+   0x080484d7 <+99>:    cmp    al,0x7f                                ;     if (res[ii] == 127)
    0x080484d9 <+101>:   jne    0x80484e6 <ft_des+114>
    0x080484db <+103>:   mov    eax,DWORD PTR [ebp+ii]
    0x080484de <+106>:   mov    edx,DWORD PTR [ebp+res]
    0x080484e1 <+109>:   add    eax,edx
-   0x080484e3 <+111>:   mov    BYTE PTR [eax],0x20
+   0x080484e3 <+111>:   mov    BYTE PTR [eax],0x20                    ;         res[ii] = 32
    0x080484e6 <+114>:   add    DWORD PTR [ebp+var_14],0x1
    0x080484ea <+118>:   mov    eax,DWORD PTR [ebp+jj]
-   0x080484ed <+121>:   add    eax,0x80486c0
+   0x080484ed <+121>:   add    eax,offs alph
    0x080484f2 <+126>:   movzx  eax,BYTE PTR [eax]
    0x080484f5 <+129>:   movsx  eax,al
    0x080484f8 <+132>:   cmp    eax,DWORD PTR [ebp+var_14]
-   0x080484fb <+135>:   jg     0x80484bc <ft_des+72>
-   0x080484fd <+137>:   jmp    0x8048553 <ft_des+223>
+   0x080484fb <+135>:   jg     0x80484bc <ft_des+72>                  ;     if (alph[jj] > var_14) goto <ft_des+72>
+   0x080484fd <+137>:   jmp    0x8048553 <ft_des+223>                 ;     else goto <ft_des+223>
    0x080484ff <+139>:   mov    eax,DWORD PTR [ebp+ii]
    0x08048502 <+142>:   and    eax,0x1
    0x08048505 <+145>:   test   eax,eax
-   0x08048507 <+147>:   jne    0x8048553 <ft_des+223>
-   0x08048509 <+149>:   mov    DWORD PTR [ebp+var_10],0x0
-   0x08048510 <+156>:   jmp    0x8048540 <ft_des+204>
+   0x08048507 <+147>:   jne    0x8048553 <ft_des+223>                 ;     if (ii & 1) goto <ft_des+223>
+   0x08048509 <+149>:   mov    DWORD PTR [ebp+var_10],0x0             ;         var_10 = 0
+   0x08048510 <+156>:   jmp    0x8048540 <ft_des+204>                 ;     goto <ft_des+204>
    0x08048512 <+158>:   mov    eax,DWORD PTR [ebp+ii]
    0x08048515 <+161>:   mov    edx,DWORD PTR [ebp+res]
    0x08048518 <+164>:   add    eax,edx
    0x0804851a <+166>:   movzx  edx,BYTE PTR [eax]
    0x0804851d <+169>:   sub    edx,0x1
-   0x08048520 <+172>:   mov    BYTE PTR [eax],dl
+   0x08048520 <+172>:   mov    BYTE PTR [eax],dl                      ;     res[ii] -= 1
    0x08048522 <+174>:   mov    eax,DWORD PTR [ebp+ii]
    0x08048525 <+177>:   mov    edx,DWORD PTR [ebp+res]
    0x08048528 <+180>:   add    eax,edx
    0x0804852a <+182>:   movzx  eax,BYTE PTR [eax]
    0x0804852d <+185>:   cmp    al,0x1f
-   0x0804852f <+187>:   jne    0x804853c <ft_des+200>
+   0x0804852f <+187>:   jne    0x804853c <ft_des+200>                 ;     if (res[ii] != 31) goto <ft_des+200>
    0x08048531 <+189>:   mov    eax,DWORD PTR [ebp+ii]
    0x08048534 <+192>:   mov    edx,DWORD PTR [ebp+res]
    0x08048537 <+195>:   add    eax,edx
-   0x08048539 <+197>:   mov    BYTE PTR [eax],0x7e
-   0x0804853c <+200>:   add    DWORD PTR [ebp+var_10],0x1
+   0x08048539 <+197>:   mov    BYTE PTR [eax],0x7e                    ;         res[ii] = 126
+   0x0804853c <+200>:   add    DWORD PTR [ebp+var_10],0x1             ;     var_10++
    0x08048540 <+204>:   mov    eax,DWORD PTR [ebp+jj]
-   0x08048543 <+207>:   add    eax,0x80486c0
+   0x08048543 <+207>:   add    eax,offs alph
    0x08048548 <+212>:   movzx  eax,BYTE PTR [eax]
    0x0804854b <+215>:   movsx  eax,al
    0x0804854e <+218>:   cmp    eax,DWORD PTR [ebp+var_10]
-   0x08048551 <+221>:   jg     0x8048512 <ft_des+158>
-   0x08048553 <+223>:   add    DWORD PTR [ebp+ii],0x1
-   0x08048557 <+227>:   add    DWORD PTR [ebp+jj],0x1
+   0x08048551 <+221>:   jg     0x8048512 <ft_des+158>                 ;     if (alph[jj] > var_10) goto <ft_des+158>
+   0x08048553 <+223>:   add    DWORD PTR [ebp+ii],0x1                 ; ii++
+   0x08048557 <+227>:   add    DWORD PTR [ebp+jj],0x1                 ; jj++
    0x0804855b <+231>:   mov    eax,DWORD PTR [ebp+res]
    0x0804855e <+234>:   mov    DWORD PTR [ebp+var_2C],0xffffffff
    0x08048565 <+241>:   mov    edx,eax
    0x08048567 <+243>:   mov    eax,0x0
    0x0804856c <+248>:   mov    ecx,DWORD PTR [ebp+var_2C]
    0x0804856f <+251>:   mov    edi,edx
-   0x08048571 <+253>:   repnz scas al,BYTE PTR es:[edi]
+   0x08048571 <+253>:   repnz scas al,BYTE PTR es:[edi]               ; strlen(res)
    0x08048573 <+255>:   mov    eax,ecx
    0x08048575 <+257>:   not    eax
    0x08048577 <+259>:   sub    eax,0x1
-   0x0804857a <+262>:   cmp    eax,DWORD PTR [ebp+ii]
-   0x0804857d <+265>:   ja     0x804849c <ft_des+40>
-   0x08048583 <+271>:   mov    eax,DWORD PTR [ebp+res]
+   0x0804857a <+262>:   cmp    eax,DWORD PTR [ebp+ii]                 ; strlen(res) > ii
+   0x0804857d <+265>:   ja     0x804849c <ft_des+40>                  ; continue loop
+   0x08048583 <+271>:   mov    eax,DWORD PTR [ebp+res]                ; return res
    0x08048586 <+274>:   add    esp,0x44
    0x08048589 <+277>:   pop    edi
    0x0804858a <+278>:   pop    ebp
@@ -182,6 +183,7 @@ level13@SnowCrash:~$ gdb -batch -ex 'file level13' -ex 'x/2i *main+63' -ex 'x/s 
 
 (lmao just use a decompiler)
 ```c
+static const char *token = "boe]!ai0FB@.:|L6l@A?>qJ}I";
 static const char *alph = "0123456";
 char *ft_des(char *str)
 {
